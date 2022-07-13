@@ -1,0 +1,199 @@
+* {
+	padding: 0;
+	margin: 0;
+	font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
+		"微软雅黑", Arial, sans-serif;
+}
+
+*::-webkit-scrollbar {
+	width: 10px;
+	height: 10px;
+}
+
+*::-webkit-scrollbar-thumb {
+	background-color: rgba(144, 147, 153, 0.3);
+}
+
+*::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+#app {
+	height: 100vh;
+	width: 100vw;
+	overflow: hidden;
+}
+
+:root {
+	--view-bg-color: #f7f7f7;
+}
+
+a {
+	text-decoration: none;
+}
+
+input,
+button {
+	outline: none;
+}
+
+input {
+	&:-webkit-autofill {
+		box-shadow: 0 0 0px 1000px white inset;
+	}
+}
+ul,
+ol {
+  list-style: none;
+}
+.fl {
+  float: left;
+}
+.fr {
+  float: right;
+}
+.text-center {
+  text-align: center;
+}
+.clearfix {
+  zoom: 1;
+}
+
+.clearfix:after,
+.clearfix:before {
+  display: table;
+  content: "";
+}
+
+.clearfix:after {
+  clear: both;
+}
+
+
+.flex1{
+	flex: 1;
+}
+
+.flex-row-start-center {
+	flex-direction: row;
+	justify-content: flex-start;
+	align-items: center
+}
+
+.flex,.flex-row-start-center {
+display: flex
+}
+
+.flex-center {
+justify-content: space-between
+}
+
+.flex-center,.flex-vertical-center {
+display: flex;
+align-items: center
+}
+
+.flex-horizontal-center,.flex-vertical-horizontal-center {
+display: flex;
+justify-content: center
+}
+
+.flex-vertical-horizontal-center {
+align-items: center
+}
+
+.flex-space-between {
+display: flex;
+justify-content: space-between
+}
+//result 提示页面
+.app-result {
+	padding: 48px 32px;
+	&-icon {
+		margin-bottom: 24px;
+		text-align: center;
+	}
+	&-image {
+		width: 250px;
+		height: 295px;
+		margin: auto;
+	}
+	&-title {
+		color: rgba(0, 0, 0, 0.85);
+		font-size: 24px;
+		line-height: 1.8;
+		text-align: center;
+	}
+	&-subtitle {
+		color: rgba(0, 0, 0, 0.45);
+		font-size: 14px;
+		line-height: 1.6;
+		text-align: center;
+	}
+	&-extra {
+		margin: 32px 0 0;
+		text-align: center;
+	}
+}
+.app-container{
+	display: flex;
+    flex-direction: column;
+    height: 100%;
+    position: relative;
+    padding: 10px;
+    box-sizing: border-box;
+    background-color: #fff;
+    overflow: hidden;
+	&.is-border {
+		border: 1px solid #eee;
+	}
+	& .el-input-number__decrease,& .el-input-number__increase{
+		border: 0;
+		background-color: transparent
+	}
+	& > .el-row {
+		overflow-x: auto;
+		overflow-y: hidden;
+		flex-wrap: nowrap;
+		padding-bottom: 5px;
+		margin-bottom: 0;
+		&::-webkit-scrollbar {
+			height: 4px
+		}
+		&::-webkit-scrollbar-thumb {
+			background-color: hsla(220,4%,58%,.3);
+			border-radius: 5px
+		}
+		::-webkit-scrollbar-track {
+			background: transparent
+		}
+		& +.el-row {
+			margin-top: 5px
+		}
+	}
+}
+.ld-search-key {
+	display: flex;
+	margin-left: 10px;
+	&__form{
+		.el-form-item{
+			margin-bottom: 0 !important;
+			margin-right: 6px !important;
+		}
+		.el-form-item:last-child{
+			margin-right: 0px !important;
+		}
+	}
+  
+	&__cascader,
+	&__select,
+	&__input {
+	  margin-right: 10px;
+	}
+  
+	&__button {
+	  &.el-button {
+		margin-left: 10px;
+	  }
+	}
+  }
