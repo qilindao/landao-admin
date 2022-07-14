@@ -1,26 +1,31 @@
 <template>
   <el-row type="flex"> </el-row>
   <el-row type="flex">
-    <el-table ref="tableRef" :max-height="maxHeight">
-      <template v-for="column in columns" :key="column.prop">
-        <el-table-column
-          :label="column.label"
-          :fixed="column.fixed || false"
-          :align="column.align || 'left'"
-        >
-          <template #default="scope">
-            <slot :name="column.prop" :scopeData="scope.row"></slot>
+    <el-table
+      ref="tableRef"
+      :max-height="maxHeight"
+      v-loading="getLoading"
+      v-bind="getTableBindValues"
+      :data="getDataSourceRef"
+    >
+      <template v-for="column in getColumn" :key="column.prop">
+        <TableColumns :column="column">
+          <template v-if="column.slot" #default="scope">
+            <slot :name="column.slot" v-bind="scope"></slot>
           </template>
-        </el-table-column>
+        </TableColumns>
+      </template>
+      <template #empty>
+        <ld-empty :description="emptyDesc" />
       </template>
     </el-table>
   </el-row>
-  <el-row type="flex" v-if="isPagination">
+  <el-row type="flex" v-if="pagination">
     <div class="flex1"></div>
     <el-pagination
-      @size-change="handleSize"
-      @current-change="handleCurrentChange"
-      v-bind="getPaginationProps"
+      @size-change="handlePageSize"
+      @current-change="handlePageCurrentChange"
+      v-bind="getPaginationInfo"
     >
     </el-pagination>
   </el-row>
@@ -35,66 +40,70 @@ import {
   unref,
 } from "vue";
 import { basicProps } from "./props";
+import { useTableHeight } from "./hooks/useTableHeight";
+import { useLoading } from "./hooks/useLoading";
+import { usePagination } from "./hooks/usePagination";
+import TableColumns from "./components/TableColumns";
+import { useDataSource } from "./hooks/useDataSource";
 
 export default defineComponent({
   name: "LdTable",
   props: basicProps,
-  setup(props) {
+  components: {
+    TableColumns,
+  },
+  setup(props, { slots, attrs }) {
     const tableRef = ref(null);
-    //总数
-    const total = ref(0);
     //表格最大高度
-    const maxHeight = ref(0);
-    //分页
-    const paginationRef = reactive({ page: 1, page_size: 20 });
-    //分页配置
-    const getPaginationProps = computed(() => {
-      const { page, page_size } = paginationRef;
-      const defOptions = {
-        background: true,
-        small: true,
-        currentPage: page,
-        pageSizes: [10, 20, 30, 40, 50, 100],
-        pageSize: page_size,
-        layout: "total, sizes, prev, pager, next, jumper",
-        total: unref(total),
-      };
-      return { ...defOptions, ...props.paginationProps };
+    const { maxHeight, updateHeight } = useTableHeight(
+      tableRef,
+      props.deductHeight
+    );
+
+    console.log("LdTable", slots);
+
+    const getProps = computed(() => {
+      return { ...props };
     });
-    //更新表格高度
-    async function updateHeight() {
-      const vm = unref(tableRef);
-      let element = null;
 
-      if (vm) {
-        let _h = 15;
+    const getColumn = computed(() => {
+      return unref(getProps).columns;
+    });
 
-        // 获取表格上一级元素
-        element = vm.$parent.$el;
-        // 获取表格上的高度
-        _h += element.offsetTop;
-        //TODO：实际上，此处要获取紧跟底部的多个兄弟节点，并累加底部兄弟节点的可视高度
-        //获取表格下的dom
-        let nextEl = element.nextElementSibling;
-        //dom存在，就获取高度
-        if (nextEl) {
-          _h += nextEl.clientHeight + 5;
-        }
-        maxHeight.value = element.offsetParent.clientHeight - _h;
-      }
-    }
+    //表格loading
+    const { getLoading, setLoading } = useLoading(getProps);
 
-    const getColumnProps = computed(() => {});
+    const {
+      getPaginationInfo,
+      setPaginationPage,
+      setPaginationPageSize,
+      setPaginationTotal,
+    } = usePagination(getProps);
+
+    const getTableBindValues = computed(() => {
+      let propsData = {
+        ...attrs,
+        ...unref(getProps),
+      };
+      return propsData;
+    });
 
     //分页
-    const handleCurrentChange = (val) => {
-      pagination.page = val;
+    const handlePageCurrentChange = (val) => {
+      setPaginationPage(val);
     };
 
     //设置一页显示数量
-    const handleSize = (val) => {
-      pagination.page_size = val;
+    const handlePageSize = (val) => {
+      setPaginationPageSize(val);
     };
+
+    const { getDataSourceRef, getDataSource, fetch } = useDataSource(getProps, {
+      setLoading,
+      setPaginationTotal,
+    });
+
+    console.log(getDataSourceRef);
 
     onMounted(() => {
       nextTick(async () => {
@@ -104,9 +113,13 @@ export default defineComponent({
     return {
       tableRef,
       maxHeight,
-      getPaginationProps,
-      handleSize,
-      handleCurrentChange,
+      getLoading,
+      getTableBindValues,
+      getPaginationInfo,
+      handlePageSize,
+      handlePageCurrentChange,
+      getColumn,
+      getDataSourceRef,
     };
   },
 });
