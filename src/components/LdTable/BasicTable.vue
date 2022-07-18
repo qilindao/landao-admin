@@ -1,9 +1,6 @@
 <template>
   <el-row type="flex" class="ld-table-header">
-    <TableHeader
-      v-bind="getToolbarProps"
-      :tableAction="tableAction"
-    >
+    <TableHeader v-bind="getToolbarProps" :tableAction="tableAction">
       <template v-if="$slots.toolbar" #toolbar="{}">
         <slot name="toolbar"></slot>
       </template>
@@ -102,16 +99,6 @@ export default defineComponent({
       return propsData;
     });
 
-    //分页
-    const handlePageCurrentChange = (val) => {
-      setPaginationPage(val);
-    };
-
-    //设置一页显示数量
-    const handlePageSize = (val) => {
-      setPaginationPageSize(val);
-    };
-
     const { getDataSourceRef, getDataSource, fetch, reload } = useDataSource(
       getProps,
       {
@@ -121,7 +108,20 @@ export default defineComponent({
       }
     );
 
+    //分页
+    const handlePageCurrentChange = async (val) => {
+      setPaginationPage(val);
+      await reload();
+    };
+
+    //设置一页显示数量
+    const handlePageSize = async (val) => {
+      setPaginationPageSize(val);
+      await reload();
+    };
+
     const tableAction = {
+      setPaginationPage,
       reload,
       fetch,
     };
@@ -142,7 +142,7 @@ export default defineComponent({
       getColumn,
       getDataSourceRef,
       getToolbarProps,
-      tableAction
+      tableAction,
     };
   },
 });

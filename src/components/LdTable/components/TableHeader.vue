@@ -10,7 +10,7 @@
       v-if="buttons.includes('refreshCurrent')"
       size="small"
       @click="handlerefreshCurrent"
-      >刷新</el-button
+      >刷新当前页</el-button
     >
     <template v-if="slots.toolbar">
       <slot name="toolbar"></slot>
@@ -32,16 +32,19 @@ export default defineComponent({
   setup(props) {
     const slots = useSlots();
 
+    const { tableAction } = props;
+
     //刷新返回第一页
-    function handleReload() {
-      props.tableAction.reload({
+    async function handleReload() {
+      tableAction.setPaginationPage(1);
+      await tableAction.reload({
         page: 1,
       });
     }
 
     //刷新当前页
-    function handlerefreshCurrent() {
-      props.tableAction.reload();
+    async function handlerefreshCurrent() {
+      await tableAction.reload();
     }
     return {
       slots,
