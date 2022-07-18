@@ -13,8 +13,9 @@
       v-loading="getLoading"
       v-bind="getTableBindValues"
       :data="getDataSourceRef"
+      @selection-change="handleSelectionChange"
     >
-      <template v-for="column in getColumn" :key="column.prop">
+      <template v-for="column in getColumns" :key="column.prop">
         <TableColumns :column="column">
           <template v-if="column.slot" #default="scope">
             <slot :name="column.slot" v-bind="scope"></slot>
@@ -52,6 +53,7 @@ import { usePagination } from "./hooks/usePagination";
 import TableColumns from "./components/TableColumns";
 import { useDataSource } from "./hooks/useDataSource";
 import TableHeader from "./components/TableHeader";
+import { useRowSelection } from "./hooks/useRowSelection";
 
 export default defineComponent({
   name: "LdTable",
@@ -60,30 +62,45 @@ export default defineComponent({
     TableColumns,
     TableHeader,
   },
-  setup(props, { slots, attrs, emit }) {
+  emits: ["register"],
+  setup(props, { slots, attrs, emit, expose }) {
+    //表格ref
     const tableRef = ref(null);
+    //表格初始props，可用于hook合并
+    const innerPropsRef = ref({});
+    //表格头部刷新按钮,button,在hook调用的时候合并
+    const toolbarButtonsRef = ref([]);
     //表格最大高度
     const { maxHeight, updateHeight } = useTableHeight(
       tableRef,
       props.deductHeight
     );
+
+    //表格props
     const getProps = computed(() => {
-      return { ...props };
+      return { ...props, ...unref(innerPropsRef) };
     });
 
-    const getColumn = computed(() => {
+    //table列props
+    const getColumns = computed(() => {
       return unref(getProps).columns;
     });
 
     //TableHeader props
     const getToolbarProps = computed(() => {
-      const { actionButtons: buttons = [] } = props;
-      return { buttons };
+      const { actionButtons = [] } = props;
+      return { buttons: [...actionButtons, ...unref(toolbarButtonsRef)] };
     });
+
+    //设置toolbar button 属性
+    const setToolbarProps = (props) => {
+      toolbarButtonsRef.value = [...unref(toolbarButtonsRef), ...props];
+    };
 
     //表格loading
     const { getLoading, setLoading } = useLoading(getProps);
 
+    //分页
     const {
       getPaginationInfo,
       setPaginationPage,
@@ -120,17 +137,40 @@ export default defineComponent({
       await reload();
     };
 
+    //设置表格props
+    function setProps(props) {
+      innerPropsRef.value = { ...unref(innerPropsRef), ...props };
+    }
+
+    //表格选中行事件
+    const {
+      setSelectedRow: handleSelectionChange,
+      getSelectedRows,
+      getSelectedRowIds,
+    } = useRowSelection(getProps);
+
+    //操作函数
     const tableAction = {
       setPaginationPage,
       reload,
       fetch,
+      setProps,
+      setToolbarProps,
+      getDataSource,
+      getSelectedRows,
+      getSelectedRowIds,
     };
+
+    expose(tableAction);
+
+    emit("register", tableAction);
 
     onMounted(() => {
       nextTick(async () => {
         await updateHeight();
       });
     });
+
     return {
       tableRef,
       maxHeight,
@@ -139,10 +179,11 @@ export default defineComponent({
       getPaginationInfo,
       handlePageSize,
       handlePageCurrentChange,
-      getColumn,
+      getColumns,
       getDataSourceRef,
       getToolbarProps,
       tableAction,
+      handleSelectionChange,
     };
   },
 });
