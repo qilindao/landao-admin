@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="table-action">
     <template v-for="(action, index) in getActions" :key="index">
       <el-tooltip v-if="action.tooltop" v-bind="getTooltip(action)">
         <el-button v-bind="action">
@@ -20,6 +20,29 @@
         {{ action.label }}
       </el-button>
     </template>
+    <el-dropdown
+      v-if="dropDownActions && getDropdownList.length > 0"
+      @command="handleCommand"
+    >
+      <span class="el-dropdown-link">
+        <span v-if="!dropDownActions.label" class="icon-more">
+          <icon-svg name="icon-moreOutlined"></icon-svg>
+        </span>
+        <span v-else>
+          {{ dropDownActions.label }}
+          <icon-svg name="icon-arrowDown"></icon-svg>
+        </span>
+      </span>
+      <template #dropdown>
+        <el-dropdown-menu>
+          <template v-for="(action, index) in getDropdownList" :key="index">
+            <el-dropdown-item v-bind="action">{{
+              action.text
+            }}</el-dropdown-item>
+          </template>
+        </el-dropdown-menu>
+      </template>
+    </el-dropdown>
   </div>
 </template>
 <script>
@@ -29,21 +52,18 @@ import { isBoolean, isFunction, isString } from "@/landao/utils/is";
 
 export default defineComponent({
   name: "TableAction",
+  emits: ["command"],
   props: {
     actions: {
       type: Array,
       default: [],
     },
     dropDownActions: {
-      type: Array,
-      default: [],
-    },
-    divider: {
-      type: Boolean,
-      default: true,
+      type: Object,
+      default: {},
     },
   },
-  setup(props) {
+  setup(props, { emit }) {
     const { hasAuth } = usePermission();
     //控制按钮是否显示
     function isIfShow(action) {
@@ -83,12 +103,60 @@ export default defineComponent({
         ...(isString(tooltip) ? { content: tooltip } : tooltip),
       };
     }
-    return { getActions, getTooltip };
+    //下拉菜单
+    const getDropdownList = computed(() => {
+      const list = (toRaw(props.dropDownActions.buttons) || []).filter(
+        (action) => {
+          return (
+            (action.auth ? hasAuth(action.auth) : true) && isIfShow(action)
+          );
+        }
+      );
+      return list.map((action, index) => {
+        const { label } = action;
+        return {
+          ...action,
+          text: label,
+        };
+      });
+    });
+
+    function handleCommand(command) {
+      emit("command", command);
+    }
+
+    return { getActions, getTooltip, getDropdownList, handleCommand };
   },
 });
 </script>
 <style lang="scss" scoped>
-.mr-1 {
-  margin-right: 1px;
+.table-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  button {
+    display: flex;
+    align-items: center;
+    padding: 0 6px;
+  }
+  .mr-1 {
+    margin-right: 1px;
+  }
+  .el-dropdown-link {
+    cursor: pointer;
+    color: var(--el-color-primary);
+    display: flex;
+    align-items: center;
+    font-size: 12px;
+  }
+  .icon-more {
+    transform: rotate(90deg);
+
+    svg {
+      font-size: 2.1em;
+      font-weight: 700;
+      color: var(--el-color-primary);
+    }
+  }
 }
 </style>
