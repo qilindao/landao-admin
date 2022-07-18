@@ -46,6 +46,7 @@ export default defineComponent({
     async function handlerefreshCurrent() {
       await tableAction.reload();
     }
+    
     return {
       slots,
       handleReload,

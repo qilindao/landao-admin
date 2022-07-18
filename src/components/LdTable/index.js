@@ -1,1 +1,3 @@
-export { default as TableAction } from './components/TableAction.vue'
+export { default as TableAction } from "./components/TableAction";
+
+export { useTable } from "./hooks/useTable";
