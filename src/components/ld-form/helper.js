@@ -21,37 +21,6 @@ export function createPlaceholderMessage(component) {
     }
     return "";
 }
-/**
- * 获取插槽以防止空错误
- * @param {*} slots 
- * @param {*} slot 
- * @param {*} data 
- * @returns 
- */
-export function getSlot(slots, slot = 'default', data) {
-    if (!slots || !Reflect.has(slots, slot)) {
-        return null;
-    }
-    if (!isFunction(slots[slot])) {
-        console.error(`${slot} is not a function!`);
-        return null;
-    }
-    const slotFn = slots[slot];
-    if (!slotFn) return null;
-    return slotFn(data)
-}
-/**
- * 获取动态 props
- * @param {*} props formRef props
- * @returns 
- */
-export function getDynamicProps(props) {
-    const ret = {}
-    Object.keys(props).map(key => {
-        ret[key] = unref(props)[key]
-    })
-    return ret
-}
 
 export function handleInputNumberValue(component, val) {
     if (!component) return val

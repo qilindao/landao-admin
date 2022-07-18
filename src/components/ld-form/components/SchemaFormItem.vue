@@ -2,8 +2,9 @@
 import { defineComponent, computed, unref } from "vue";
 import { componentMap } from "../componentMap";
 import { upperFirst, cloneDeep } from "lodash-es";
+import { getSlot } from "@/landao/utils";
 import { isFunction, isBoolean } from "@/landao/utils/is";
-import { createPlaceholderMessage, getSlot } from "../helper";
+import { createPlaceholderMessage } from "../helper";
 
 export default defineComponent({
   name: "SchemaFormItem",

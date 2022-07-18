@@ -1,5 +1,5 @@
 import { nextTick, ref, unref, onUnmounted, watch } from "vue";
-import { getDynamicProps } from "../helper";
+import { getDynamicProps } from "@/landao/utils";
 
 export function useForm(props) {
     const formRef = ref(null)
