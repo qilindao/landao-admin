@@ -1,5 +1,9 @@
 <template>
   <div class="table-setting">
+    <SizeSetting
+      v-if="getSetting.size"
+      :getPopupContainer="getPopupContainer"
+    ></SizeSetting>
     <!-- <FullScreenSetting
       class="setting-svg"
       v-if="getSetting.fullScreen"
@@ -10,12 +14,14 @@
 <script>
 import { computed, defineComponent } from "vue";
 // import FullScreenSetting from "./FullScreenSetting";
+import SizeSetting from "./SizeSetting.vue";
 import { useTableContext } from "../../hooks/useTableContext";
 
 export default defineComponent({
   name: "TableSetting",
   components: {
     // FullScreenSetting,
+    SizeSetting,
   },
   props: {
     setting: {
@@ -56,7 +62,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .table-setting {
-  margin:0 8px;
+  margin: 0 8px;
   & > * {
     margin-right: 12px;
   }

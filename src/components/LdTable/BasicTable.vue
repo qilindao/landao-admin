@@ -189,6 +189,9 @@ export default defineComponent({
       getSelectedRowIds,
       clearSelectedRowKeys,
       setTableLayout,
+      getSize: () => {
+        return unref(getTableBindValues).size;
+      },
     };
 
     expose(tableAction);
