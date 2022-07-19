@@ -1,104 +1,49 @@
 <template>
   <div class="app-container">
-    <ld-table
-      ref="logTableRef"
-      :service-api="serviceApi"
-      :table-config="tableConfig"
-      :filter-data="filterData"
-      :is-pagination="true"
-    >
-      <template #toolbar> </template>
-      <template #filter>
-        <el-form-item prop="search_text">
-          <el-input
-            class="ld-search-key__input"
-            v-model="filterData.search_text"
-            placeholder="请输入用户名称"
-            clearable
-            size="small"
-          />
-        </el-form-item>
-      </template>
-      <template v-slot:operatorSlot="{ scopeData }">
-        <el-button type="danger" size="small" @click="handleDel(scopeData.row)"
-          >删除</el-button
-        >
+    <LdTable ref="logTableRef" @register="register">
+      <template #toolbar>
         <el-button
-          type="primary"
+          type="danger"
+          :disabled="getSelectedRowIds().length === 0"
           size="small"
-          @click="handleEdit(scopeData.row)"
-          >编辑</el-button
-        >
+          @click="handleDatchDel"
+          >批量删除</el-button
+        ></template
+      >
+      <template v-slot:operatorSlot="{ row }">
+        <TableAction
+          :actions="[
+            {
+              label: '删除',
+              type: 'danger',
+              auth: 'manage.log.destroy',
+              onClick: handleDel.bind(null, row),
+            },
+          ]"
+        ></TableAction>
       </template>
-    </ld-table>
+    </LdTable>
   </div>
 </template>
 <script>
 import { LogService } from "@/service";
-import { reactive, ref } from "vue";
+import { ref } from "vue";
 import { ElMessageBox, ElMessage } from "element-plus";
+import LogSchemas from "@/views/system/schemas/LogSchemas";
+import { TableAction, useTable } from "@/components/LdTable";
+
 export default {
+  components: {
+    TableAction,
+  },
   setup() {
-    const filterData = reactive({ search_text: "" });
-    const logTableRef = ref();
-    const tableConfig = {
-      attrs: {
-        rowKey: "log_id", //表格索引
-        size: "small", //表格和搜索表单尺寸
-      },
-      columns: [
-        {
-          title: "#",
-          width: 200,
-          align: "center",
-          fixed: "left",
-          type: "index",
-        },
-        {
-          title: "用户名",
-          width: 200,
-          align: "center",
-          key: "manage_username",
-        },
-        {
-          title: "请求地址",
-          width: 200,
-          align: "center",
-          key: "log_action",
-        },
-        {
-          title: "请求参数",
-          width: 200,
-          align: "center",
-          key: "log_params",
-        },
-        {
-          title: "请求IP",
-          width: 200,
-          align: "center",
-          key: "log_ip",
-        },
-        {
-          title: "创建时间",
-          width: 150,
-          align: "center",
-          key: "created_at",
-        },
-        {
-          title: "操作",
-          width: 200,
-          fixed: "right",
-          align: "center",
-          customSlot: "operatorSlot",
-        },
-      ],
-    };
+    const logTableRef = ref(null);
 
     //删除日志
     const handleDel = (row) => {
       ElMessageBox.confirm("此操作将永久删除选中数据，是否继续？", "提示", {
-        confirmButtonText: "OK",
-        cancelButtonText: "Cancel",
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
         type: "warning",
       })
         .then(() => {
@@ -114,19 +59,53 @@ export default {
         })
         .catch(() => {});
     };
-    const handleEdit = (row) => {
-      console.log("修改", row);
-    };
 
-    const serviceApi = LogService.getList;
+    //表格配置和表单配置
+    const { tableColumns } = LogSchemas();
+
+    const [
+      register,
+      { getSelectedRowIds, reload, setPaginationPage, clearSelectedRowKeys },
+    ] = useTable({
+      api: LogService.getList,
+      actionButtons: ["refresh", "refreshCurrent"],
+      columns: tableColumns,
+      rowKey: "log_id",
+      showTableSetting: true,
+      showEasySearch: true,
+      tableSetting: {
+        fullScreen: true,
+      },
+    });
+
+    function handleDatchDel() {
+      ElMessageBox.confirm("此操作将永久删除选中数据，是否继续？", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
+      })
+        .then(() => {
+          LogService.doBatch(getSelectedRowIds())
+            .then((res) => {
+              if (res.code === 200) {
+                setPaginationPage(1);
+                clearSelectedRowKeys();
+                reload();
+              }
+            })
+            .catch((error) => {
+              console.log(error);
+            });
+        })
+        .catch((err) => {});
+    }
 
     return {
-      tableConfig,
       handleDel,
-      handleEdit,
-      serviceApi,
-      filterData,
       logTableRef,
+      register,
+      handleDatchDel,
+      getSelectedRowIds,
     };
   },
 };

@@ -10,7 +10,11 @@
       row-key="menuId"
     >
       <template #toolbar>
-        <el-button v-auth="'manage.menu.store'" type="primary" size="small" @click="openDialog()"
+        <el-button
+          v-auth="'manage.menu.store'"
+          type="primary"
+          size="small"
+          @click="openDialog()"
           >新增</el-button
         ></template
       >
