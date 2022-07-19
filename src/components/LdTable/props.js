@@ -24,4 +24,13 @@ export const basicProps = {
     background: "#f5f7fa",
     color: "#606266",
   }), //表头样式
+  //表头右侧设置
+  showTableSetting: VueTypes.bool.def(false),
+  showEasySearch: VueTypes.bool.def(false),
+  tableSetting: VueTypes.object.def({
+    size: false, //表格大小
+    setting: false, //列设置
+    fullScreen: false, //是否全屏
+    search: false, //是否启用高级搜索
+  }),
 };

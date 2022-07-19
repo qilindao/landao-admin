@@ -1,41 +1,43 @@
 <template>
-  <el-row type="flex" class="ld-table-header">
-    <TableHeader v-bind="getToolbarProps" :tableAction="tableAction">
-      <template v-if="$slots.toolbar" #toolbar="{}">
-        <slot name="toolbar"></slot>
-      </template>
-    </TableHeader>
-  </el-row>
-  <el-row type="flex" class="ld-table-body">
-    <el-table
-      ref="tableRef"
-      :max-height="maxHeight"
-      v-loading="getLoading"
-      v-bind="getTableBindValues"
-      :data="getDataSourceRef"
-      @selection-change="handleSelectionChange"
-    >
-      <template v-for="column in getColumns" :key="column.prop">
-        <TableColumns :column="column">
-          <template v-if="column.slot" #default="scope">
-            <slot :name="column.slot" v-bind="scope"></slot>
-          </template>
-        </TableColumns>
-      </template>
-      <template #empty>
-        <ld-empty :description="emptyDesc" />
-      </template>
-    </el-table>
-  </el-row>
-  <el-row type="flex" v-if="pagination" class="ld-table-footer">
-    <div class="flex1"></div>
-    <el-pagination
-      @size-change="handlePageSize"
-      @current-change="handlePageCurrentChange"
-      v-bind="getPaginationInfo"
-    >
-    </el-pagination>
-  </el-row>
+  <div ref="wrapRef" class="ld-table clearfix">
+    <el-row type="flex" class="ld-table-header">
+      <TableHeader v-bind="getToolbarProps" :tableAction="tableAction">
+        <template v-if="$slots.toolbar" #toolbar="{}">
+          <slot name="toolbar"></slot>
+        </template>
+      </TableHeader>
+    </el-row>
+    <el-row type="flex" class="ld-table-body">
+      <el-table
+        ref="tableRef"
+        :max-height="maxHeight"
+        v-loading="getLoading"
+        v-bind="getTableBindValues"
+        :data="getDataSourceRef"
+        @selection-change="handleSelectionChange"
+      >
+        <template v-for="column in getColumns" :key="column.prop">
+          <TableColumns :column="column">
+            <template v-if="column.slot" #default="scope">
+              <slot :name="column.slot" v-bind="scope"></slot>
+            </template>
+          </TableColumns>
+        </template>
+        <template #empty>
+          <ld-empty :description="emptyDesc" />
+        </template>
+      </el-table>
+    </el-row>
+    <el-row type="flex" v-if="pagination" class="ld-table-footer">
+      <div class="flex1"></div>
+      <el-pagination
+        @size-change="handlePageSize"
+        @current-change="handlePageCurrentChange"
+        v-bind="getPaginationInfo"
+      >
+      </el-pagination>
+    </el-row>
+  </div>
 </template>
 <script>
 import {
@@ -54,6 +56,8 @@ import TableColumns from "./components/TableColumns";
 import { useDataSource } from "./hooks/useDataSource";
 import TableHeader from "./components/TableHeader";
 import { useRowSelection } from "./hooks/useRowSelection";
+import { createTableContext } from "./hooks/useTableContext";
+import { useTableEvents } from "./hooks/useTableEvents";
 
 export default defineComponent({
   name: "LdTable",
@@ -66,10 +70,11 @@ export default defineComponent({
   setup(props, { slots, attrs, emit, expose }) {
     //表格ref
     const tableRef = ref(null);
+    const wrapRef = ref(null);
     //表格初始props，可用于hook合并
     const innerPropsRef = ref({});
     //表格头部刷新按钮,button,在hook调用的时候合并
-    const toolbarButtonsRef = ref([]);
+    const toolbarPropsRef = ref({});
     //表格最大高度
     const { maxHeight, updateHeight } = useTableHeight(
       tableRef,
@@ -88,13 +93,32 @@ export default defineComponent({
 
     //TableHeader props
     const getToolbarProps = computed(() => {
-      const { actionButtons = [] } = props;
-      return { buttons: [...actionButtons, ...unref(toolbarButtonsRef)] };
+      const {
+        actionButtons = [],
+        showTableSetting = false,
+        showEasySearch = false,
+        tableSetting = {
+          size: false, //表格大小
+          setting: false, //列设置
+          fullScreen: false, //是否全屏
+          search: false, //是否启用高级搜索
+        },
+      } = props;
+      const opt = {
+        showTableSetting,
+        tableSetting,
+        showEasySearch,
+        buttons: [...actionButtons],
+      };
+      return {
+        ...opt,
+        ...unref(toolbarPropsRef),
+      };
     });
 
     //设置toolbar button 属性
     const setToolbarProps = (props) => {
-      toolbarButtonsRef.value = [...unref(toolbarButtonsRef), ...props];
+      toolbarPropsRef.value = { ...unref(toolbarPropsRef), ...props };
     };
 
     //表格loading
@@ -147,7 +171,11 @@ export default defineComponent({
       setSelectedRow: handleSelectionChange,
       getSelectedRows,
       getSelectedRowIds,
-    } = useRowSelection(getProps);
+      clearSelectedRowKeys,
+    } = useRowSelection(tableRef, getProps);
+
+    //表格方法
+    const { setTableLayout } = useTableEvents({ tableRef });
 
     //操作函数
     const tableAction = {
@@ -159,11 +187,16 @@ export default defineComponent({
       getDataSource,
       getSelectedRows,
       getSelectedRowIds,
+      clearSelectedRowKeys,
+      setTableLayout,
     };
 
     expose(tableAction);
 
     emit("register", tableAction);
+
+    //创建父组件对嵌套子组件数据提供
+    createTableContext({ ...tableAction, wrapRef, getTableBindValues });
 
     onMounted(() => {
       nextTick(async () => {
@@ -173,6 +206,7 @@ export default defineComponent({
 
     return {
       tableRef,
+      wrapRef,
       maxHeight,
       getLoading,
       getTableBindValues,
@@ -188,3 +222,14 @@ export default defineComponent({
   },
 });
 </script>
+<style lang="scss" scoped>
+.ld-table {
+  max-width: 100%;
+  height: 100%;
+  padding: 6px;
+  background: #fff;
+  &-body {
+    padding: 10px 0;
+  }
+}
+</style>

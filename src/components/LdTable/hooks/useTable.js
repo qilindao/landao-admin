@@ -14,10 +14,28 @@ export function useTable(tableProps) {
     });
     if (unref(loadedRef) && instance === unref(tableRef)) return;
     tableRef.value = instance;
-    //设置表格props
-    tableRef && instance.setProps(getDynamicProps(tableProps));
-    //设置表格头部刷新按钮
-    tableRef && instance.setToolbarProps(tableProps.actionButtons);
+    if (tableRef) {
+      //设置表格props
+      instance.setProps(getDynamicProps(tableProps));
+      //设置表格头部刷新按钮
+      const {
+        actionButtons = [],
+        showTableSetting = false,
+        showEasySearch = false,
+        tableSetting = {
+          size: false, //表格大小
+          setting: false, //列设置
+          fullScreen: false, //是否全屏
+          search: false, //是否启用高级搜索
+        },
+      } = tableProps;
+      instance.setToolbarProps({
+        showTableSetting,
+        tableSetting,
+        showEasySearch,
+        buttons: [...actionButtons],
+      });
+    }
     loadedRef.value = true;
 
     stopWatch?.();
@@ -39,6 +57,7 @@ export function useTable(tableProps) {
     if (!table) {
       throw console.error("Table 实例未创建，请确保 Table 实例已创建。");
     }
+    console.log(tableRef);
     return table;
   }
 
@@ -68,9 +87,13 @@ export function useTable(tableProps) {
     setPaginationPage: (page) => {
       return getTableInstance().setPaginationPage(page);
     },
+    //清除用户选中
+    clearSelectedRowKeys: () => {
+      getTableInstance().clearSelectedRowKeys();
+    },
     //对 Table 进行重新布局。 当表格可见性变化时，您可能需要调用此方法以获得正确的布局
     setTableLayout: () => {
-      getTableInstance().doLayout();
+      getTableInstance().setTableLayout();
     },
     //表格多选，选中列
     getSelectedRows: () => {
