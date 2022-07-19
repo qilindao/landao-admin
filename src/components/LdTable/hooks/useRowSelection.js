@@ -1,6 +1,6 @@
 import { ref, unref, computed } from "vue";
 
-export function useRowSelection(propsRef) {
+export function useRowSelection(tableRef, propsRef) {
   //选中数据列表
   const selectedRowRef = ref([]);
   //是否选中数据
@@ -25,6 +25,16 @@ export function useRowSelection(propsRef) {
     isSelectedRow.value = selectedRows.length > 0 ? true : false;
   };
 
+  /**
+   * 清除用户选中
+   */
+  const clearSelectedRowKeys = () => {
+    selectedRowRef.value = [];
+    isSelectedRow.value = false;
+    //清除用户的选择，否则表格多选头部会呈现半选中
+    unref(tableRef).clearSelection();
+  };
+
   //获取选中数据id值
   const getSelectedRowIds = () => {
     const rows = unref(selectedRowRef);
@@ -40,5 +50,6 @@ export function useRowSelection(propsRef) {
     getSelectedRows,
     setSelectedRow,
     getSelectedRowIds,
+    clearSelectedRowKeys,
   };
 }
