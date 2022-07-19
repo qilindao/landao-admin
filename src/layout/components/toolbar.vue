@@ -3,57 +3,33 @@
     <el-tooltip
       class="box-item"
       effect="dark"
-      :content="appStore.isFullscreen ? '退出全屏' : '全屏'"
+      :content="getTitle"
       placement="bottom"
     >
       <icon-svg
         size="26px"
-        :name="
-          appStore.isFullscreen ? 'icon-fullscreen-exit' : 'icon-fullscreen'
-        "
-        @click="onHandleFullscreen"
+        :name="isFullscreen ? 'icon-fullscreen-exit' : 'icon-fullscreen'"
+        @click="toggle"
       ></icon-svg>
     </el-tooltip>
   </div>
 </template>
 <script>
-import { defineComponent } from "vue";
-import { useBaseStore } from "@/store";
+import { defineComponent, computed, unref } from "vue";
+import { useFullscreen } from "@vueuse/core";
 
 export default defineComponent({
   name: "Toolbar",
   setup() {
-    const { app: appStore } = useBaseStore();
     //全屏操作
-    const onHandleFullscreen = () => {
-      const doc = document,
-        docBody = doc.body;
-      if (appStore.isFullscreen) {
-        if (doc.exitFullscreen) {
-          doc.exitFullscreen();
-        } else if (doc.mozCancelFullScreen) {
-          doc.mozCancelFullScreen();
-        } else if (doc.webkitCancelFullScreen) {
-          doc.webkitCancelFullScreen();
-        } else if (doc.msExitFullscreen) {
-          doc.msExitFullscreen();
-        }
-      } else {
-        if (docBody.requestFullscreen) {
-          docBody.requestFullscreen();
-        } else if (docBody.mozRequestFullScreen) {
-          docBody.mozRequestFullScreen();
-        } else if (docBody.webkitRequestFullScreen) {
-          docBody.webkitRequestFullScreen();
-        } else if (docBody.msRequestFullscreen) {
-          docBody.msRequestFullscreen();
-        }
-      }
-      appStore.setFullscreen(!appStore.isFullscreen);
-    };
+    const { toggle, isFullscreen } = useFullscreen();
+    const getTitle = computed(() => {
+      return unref(isFullscreen) ? "退出全屏" : "全屏";
+    });
     return {
-      onHandleFullscreen,
-      appStore,
+      toggle,
+      isFullscreen,
+      getTitle,
     };
   },
 });
