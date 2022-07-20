@@ -1,15 +1,15 @@
-import iconSvg from "./icon-svg";
-import ldImage from "./ld-image"
-import ldEmpty from "./ld-empty"
+import IconSvg from "./IconSvg";
+import LdImage from "./LdImage"
+import LdEmpty from "./LdEmpty"
 import LdTable from "./LdTable/BasicTable"
-import ldForm from "./ld-form/Form"
-import ldHelp from "./ld-help"
+import LdForm from "./LdForm/Form"
+import LdHelp from "./LdHelp"
 
 export default {
-	iconSvg,
-	ldImage,
-	ldEmpty,
+	IconSvg,
+	LdImage,
+	LdEmpty,
 	LdTable,
-	ldForm,
-	ldHelp
+	LdForm,
+	LdHelp
 }
