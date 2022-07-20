@@ -18,8 +18,22 @@
       >
         <template v-for="column in getColumns" :key="column.prop">
           <TableColumns :column="column">
-            <template v-if="column.slot" #default="scope">
-              <slot :name="column.slot" v-bind="scope"></slot>
+            <template
+              v-if="column.slot || column.customRender"
+              #default="scope"
+            >
+              <template v-if="column.slot">
+                <slot :name="column.slot" v-bind="scope"></slot>
+              </template>
+              <template v-if="column.customRender">
+                <TableColumnCell
+                  :text="scope.row[column.prop]"
+                  :column="column"
+                  :row="scope.row"
+                  :index="scope.$index"
+                  :customRender="column.customRender"
+                ></TableColumnCell>
+              </template>
             </template>
           </TableColumns>
         </template>
@@ -58,6 +72,7 @@ import TableHeader from "./components/TableHeader";
 import { useRowSelection } from "./hooks/useRowSelection";
 import { createTableContext } from "./hooks/useTableContext";
 import { useTableEvents } from "./hooks/useTableEvents";
+import TableColumnCell from "./components/TableColumnCell.vue";
 
 export default defineComponent({
   name: "LdTable",
@@ -65,6 +80,7 @@ export default defineComponent({
   components: {
     TableColumns,
     TableHeader,
+    TableColumnCell,
   },
   emits: ["register"],
   setup(props, { slots, attrs, emit, expose }) {

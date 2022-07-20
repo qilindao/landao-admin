@@ -19,7 +19,7 @@ export default defineComponent({
       //omit 排除掉不需要的属性
       return createVNode(
         ElTableColumn,
-        omit(attrs, ["slot", "show"]),
+        omit(attrs, ["slot", "show", "customRender"]),
         slots.default
       );
     };
