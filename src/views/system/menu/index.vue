@@ -34,9 +34,6 @@
           style="margin-top: 5px"
         ></icon-svg>
       </template>
-      <template v-slot:menuTypeSlot="{ row }">
-        <el-tag size="small" effect="dark">{{ menuType[row.menuType] }}</el-tag>
-      </template>
       <template v-slot:apiPathSlot="{ row }">
         <el-tag effect="dark" size="small" v-if="row.apiPath">{{
           row.apiPath
@@ -125,7 +122,7 @@ export default {
     const menuTreeSelectRef = ref(false);
 
     //表格配置和表单配置
-    const { tableColumns, formSchemas, menuType } = MenuSchemas();
+    const { tableColumns, formSchemas } = MenuSchemas();
 
     //更新菜单id
     const updateMenuId = ref(0);
@@ -278,7 +275,6 @@ export default {
       tableColumns,
       getMenuListApi: MenuService.getList,
       menuTableRef,
-      menuType,
       handleDel,
       menuFormEl,
       dialogFormVisible,

@@ -1,5 +1,7 @@
 import { MenuService } from "@/service";
 export default function MenuSchemas() {
+  //菜单类型
+  const menuType = ["目录", "菜单", "权限"];
   //获取视图路径
   function getViewFilePath() {
     const files = import.meta.globEager("/**/views/**/*.{vue,tsx}");
@@ -34,7 +36,14 @@ export default function MenuSchemas() {
       label: "类型",
       width: 200,
       align: "center",
-      slot: "menuTypeSlot",
+      prop: "menuType",
+      customRender: ({ text }) => {
+        return (
+          <el-tag size="small" effect="dark">
+            {menuType[text]}
+          </el-tag>
+        );
+      },
     },
     {
       label: "路由名",
@@ -203,8 +212,7 @@ export default function MenuSchemas() {
       },
     },
   ];
-  //菜单类型
-  const menuType = ["目录", "菜单", "权限"];
+
   return {
     tableColumns,
     formSchemas,
