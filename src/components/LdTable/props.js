@@ -36,6 +36,7 @@ export const basicProps = {
   isTreeTable: VueTypes.bool.def(false), //是否树形表格
   showIndexColumn: VueTypes.bool.def(false), //是否显示序号,默认不显示。要显示，请开启或在columns中配置
   indexColumnProps: VueTypes.object.def(null), //序号列属性
-  showSelectionColumn: VueTypes.bool.def(false),
-  selectionColumnProps: VueTypes.object.def(null),
+  showSelectionColumn: VueTypes.bool.def(false), //是否显示多选框
+  selectionColumnProps: VueTypes.object.def(null), //多选框属性
+  rightOperatorActionName: VueTypes.string.def("operatorAction"), //右侧操作条prop名
 };

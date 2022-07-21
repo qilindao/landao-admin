@@ -145,7 +145,7 @@ export default defineComponent({
     } = usePagination(getProps);
 
     //table列props
-    const { getColumns, getViewColumns } = useColumns(
+    const { getColumns, getViewColumns, setColumns } = useColumns(
       getProps,
       getPaginationInfo
     );
@@ -209,6 +209,7 @@ export default defineComponent({
       setTableLayout,
       getColumns,
       getViewColumns,
+      setColumns,
       getSize: () => {
         return unref(getTableBindValues).size;
       },

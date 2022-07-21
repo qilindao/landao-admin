@@ -32,8 +32,7 @@ export default defineComponent({
       default: () => ({}),
     },
   },
-  emits: ["columns-change"],
-  setup(props, { emit }) {
+  setup(props) {
     const table = useTableContext();
 
     const getSetting = computed(() => {
@@ -45,18 +44,12 @@ export default defineComponent({
       };
     });
 
-    //设置表格列显示隐藏
-    function handleColumnChange(data) {
-      emit("columns-change", data);
-    }
-
     function getPopupContainer() {
       return table ? unref(table.wrapRef) : document.body;
     }
 
     return {
       getSetting,
-      handleColumnChange,
       getPopupContainer,
     };
   },

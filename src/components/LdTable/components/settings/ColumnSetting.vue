@@ -8,7 +8,11 @@
       </span>
     </template>
     <el-scrollbar height="280px" class="table-column-setting">
-      <el-checkbox-group v-model="checkedList" ref="columnListRef">
+      <el-checkbox-group
+        v-model="checkedList"
+        ref="columnListRef"
+        @change="handleChange"
+      >
         <template v-for="item in plainOptions" :key="item.value">
           <div
             class="table-column-setting__check-item"
@@ -21,7 +25,10 @@
                 content="固定到左侧"
                 placement="bottom-end"
               >
-                <IconSvg name="icon-arrow-align-left"></IconSvg>
+                <IconSvg
+                  :class="[{ active: item.fixed === 'left' }]"
+                  name="icon-arrow-align-left"
+                ></IconSvg>
               </el-tooltip>
             </span>
             <el-divider direction="vertical" />
@@ -31,7 +38,10 @@
                 content="固定到右侧"
                 placement="bottom-end"
               >
-                <IconSvg name="icon-arrow-align-left"></IconSvg
+                <IconSvg
+                  :class="[{ active: item.fixed === 'right' }]"
+                  name="icon-arrow-align-left"
+                ></IconSvg
               ></el-tooltip>
             </span>
           </div>
@@ -56,21 +66,38 @@ export default defineComponent({
     const table = useTableContext();
     const columnListRef = ref(null);
     const plainOptions = ref([]);
+    const plainSortOptions = ref([]);
+
     const state = reactive({
       isInit: true, //加载
       checkedList: [], //已选中
     });
+    //某列的选中和取消选中
+    function handleChange(checkedList = []) {
+      const sortList = unref(plainSortOptions).map((item) => item.value);
+      checkedList.sort((prev, next) => {
+        return sortList.indexOf(prev) - sortList.indexOf(next);
+      });
+      setColumns(checkedList);
+    }
 
     //重新获取表格列表配置
     function getColumns() {
       const ret = [];
-      table.getColumns({ ignoreIndex: true }).forEach((item) => {
-        const { label, prop } = item;
-        ret.push({
-          label,
-          value: prop || label,
+      table
+        .getColumns({
+          ignoreIndex: true,
+          ignoreSelection: true,
+          ignoreOperatorAction: true,
+        })
+        .forEach((item) => {
+          const { label, prop } = item;
+          ret.push({
+            label,
+            value: prop || label,
+            fixed: item.fixed || "",
+          });
         });
-      });
       return ret;
     }
 
@@ -78,13 +105,18 @@ export default defineComponent({
     function init() {
       const columns = getColumns();
       const checkList = table
-        .getColumns({ ignoreIndex: true })
+        .getColumns({
+          ignoreIndex: true,
+          ignoreSelection: true,
+          ignoreOperatorAction: true,
+        })
         .map((item) => {
           return item.prop || item.label;
         })
         .filter(Boolean);
       if (!plainOptions.value.length) {
         plainOptions.value = columns;
+        plainSortOptions.value = columns;
       } else {
         unref(plainOptions).forEach((item) => {
           const findItem = columns.find((column) => column.prop === item.prop);
@@ -106,10 +138,15 @@ export default defineComponent({
       }, 0);
     });
 
+    function setColumns(columns = []) {
+      table.setColumns(columns)
+    }
+
     return {
       ...toRefs(state),
       plainOptions,
       columnListRef,
+      handleChange,
     };
   },
 });
