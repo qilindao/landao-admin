@@ -1,7 +1,7 @@
 <template>
   <el-tooltip effect="dark" content="表格尺寸" placement="top">
     <el-dropdown trigger="click" @command="handleCommand">
-      <icon-svg name="icon-column-height" size="24px"></icon-svg>
+      <icon-svg name="icon-column-height" size="24px" color="#000"></icon-svg>
       <template #dropdown>
         <el-dropdown-menu>
           <template v-for="(item, index) in sizeType" :key="index">

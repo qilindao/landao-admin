@@ -42,9 +42,7 @@ export function useDataSource(
         ...pageParams,
         ...omit(params, ["page", "page_size"]),
       });
-      console.log("dataSource", res.data);
       const isArrayResult = Array.isArray(res.data);
-      console.log(isArrayResult);
       let resultItem = [];
       if (isArrayResult) {
         resultItem = res.data;
@@ -53,7 +51,6 @@ export function useDataSource(
           //设置总条数
           setPaginationTotal(res.data.pagination.total);
         }
-        console.log("resultItem", res.data.list);
         resultItem = res.data.list;
       }
       //对返回值进行处理，比如将数据转成树形数据，或对加密数据进行解密或脱敏
