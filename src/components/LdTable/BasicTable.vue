@@ -16,8 +16,8 @@
         :data="getDataSourceRef"
         @selection-change="handleSelectionChange"
       >
-        <template v-for="column in getColumns" :key="column.prop">
-          <TableColumns :column="column">
+        <template v-for="column in getViewColumns" :key="column.prop">
+          <TableColumns :column="column" v-if="column.visible !== false">
             <template
               v-if="column.slot || column.customRender"
               #default="scope"
@@ -73,6 +73,7 @@ import { useRowSelection } from "./hooks/useRowSelection";
 import { createTableContext } from "./hooks/useTableContext";
 import { useTableEvents } from "./hooks/useTableEvents";
 import TableColumnCell from "./components/TableColumnCell.vue";
+import { useColumns } from "./hooks/useColumns";
 
 export default defineComponent({
   name: "LdTable",
@@ -100,11 +101,6 @@ export default defineComponent({
     //表格props
     const getProps = computed(() => {
       return { ...props, ...unref(innerPropsRef) };
-    });
-
-    //table列props
-    const getColumns = computed(() => {
-      return unref(getProps).columns;
     });
 
     //TableHeader props
@@ -147,6 +143,12 @@ export default defineComponent({
       setPaginationPageSize,
       setPaginationTotal,
     } = usePagination(getProps);
+
+    //table列props
+    const { getColumns, getViewColumns } = useColumns(
+      getProps,
+      getPaginationInfo
+    );
 
     const getTableBindValues = computed(() => {
       let propsData = {
@@ -205,6 +207,8 @@ export default defineComponent({
       getSelectedRowIds,
       clearSelectedRowKeys,
       setTableLayout,
+      getColumns,
+      getViewColumns,
       getSize: () => {
         return unref(getTableBindValues).size;
       },
@@ -232,7 +236,7 @@ export default defineComponent({
       getPaginationInfo,
       handlePageSize,
       handlePageCurrentChange,
-      getColumns,
+      getViewColumns,
       getDataSourceRef,
       getToolbarProps,
       tableAction,

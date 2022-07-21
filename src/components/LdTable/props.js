@@ -33,4 +33,9 @@ export const basicProps = {
     fullScreen: false, //是否全屏
     search: false, //是否启用高级搜索
   }),
+  isTreeTable: VueTypes.bool.def(false), //是否树形表格
+  showIndexColumn: VueTypes.bool.def(false), //是否显示序号,默认不显示。要显示，请开启或在columns中配置
+  indexColumnProps: VueTypes.object.def(null), //序号列属性
+  showSelectionColumn: VueTypes.bool.def(false),
+  selectionColumnProps: VueTypes.object.def(null),
 };

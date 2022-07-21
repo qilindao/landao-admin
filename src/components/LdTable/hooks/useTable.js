@@ -57,7 +57,6 @@ export function useTable(tableProps) {
     if (!table) {
       throw console.error("Table 实例未创建，请确保 Table 实例已创建。");
     }
-    console.log(tableRef);
     return table;
   }
 
