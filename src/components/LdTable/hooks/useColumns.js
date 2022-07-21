@@ -177,10 +177,26 @@ export function useColumns(propsRef, getPaginationRef) {
     // }
     return columns;
   }
+
+  //设置固定位置
+  function setColumnFixed(column, fixed) {
+    const isFixed = column.fixed === fixed ? false : fixed;
+    const index = unref(columnsRef).findIndex(
+      (col) => col.prop === column.value
+    );
+    if (index !== -1) {
+      unref(columnsRef)[index].fixed = isFixed;
+      if (isFixed && !unref(columnsRef)[index].width) {
+        unref(columnsRef)[index].width = 100;
+      }
+    }
+  }
+
   return {
     getColumnsRef,
     getColumns,
     setColumns,
     getViewColumns,
+    setColumnFixed,
   };
 }

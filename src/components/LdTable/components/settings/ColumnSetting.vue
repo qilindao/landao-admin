@@ -19,29 +19,31 @@
             v-if="!('ifShow' in item && !item.ifShow)"
           >
             <el-checkbox :label="item.value">{{ item.label }}</el-checkbox>
-            <span class="table-column-setting__fixed-left">
+            <span
+              class="table-column-setting__fixed-left"
+              :class="[{ active: item.fixed === 'left' }]"
+              @click="handleColumnFixed(item, 'left')"
+            >
               <el-tooltip
                 effect="dark"
                 content="固定到左侧"
                 placement="bottom-end"
               >
-                <IconSvg
-                  :class="[{ active: item.fixed === 'left' }]"
-                  name="icon-arrow-align-left"
-                ></IconSvg>
+                <IconSvg name="icon-arrow-align-left"></IconSvg>
               </el-tooltip>
             </span>
             <el-divider direction="vertical" />
-            <span class="table-column-setting__fixed-right">
+            <span
+              class="table-column-setting__fixed-right"
+              :class="[{ active: item.fixed === 'right' }]"
+              @click="handleColumnFixed(item, 'right')"
+            >
               <el-tooltip
                 effect="dark"
                 content="固定到右侧"
                 placement="bottom-end"
               >
-                <IconSvg
-                  :class="[{ active: item.fixed === 'right' }]"
-                  name="icon-arrow-align-left"
-                ></IconSvg
+                <IconSvg name="icon-arrow-align-left"></IconSvg
               ></el-tooltip>
             </span>
           </div>
@@ -95,7 +97,7 @@ export default defineComponent({
           ret.push({
             label,
             value: prop || label,
-            fixed: item.fixed || "",
+            fixed: item.fixed || false,
           });
         });
       return ret;
@@ -138,8 +140,21 @@ export default defineComponent({
       }, 0);
     });
 
+    //设置列显示隐藏
     function setColumns(columns = []) {
-      table.setColumns(columns)
+      table.setColumns(columns);
+    }
+    //设置固定位置
+    function handleColumnFixed(column, fixed) {
+      if (!state.checkedList.includes(column.value)) return;
+      table.setColumnFixed(column, fixed);
+      const columns = getColumns();
+      const isFixed = column.fixed === fixed ? false : fixed;
+      const index = columns.findIndex((col) => col.prop === column.value);
+      if (index !== -1) {
+        columns[index].fixed = isFixed;
+      }
+      plainOptions.value = columns;
     }
 
     return {
@@ -147,6 +162,7 @@ export default defineComponent({
       plainOptions,
       columnListRef,
       handleChange,
+      handleColumnFixed,
     };
   },
 });
