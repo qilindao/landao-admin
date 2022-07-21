@@ -8,47 +8,46 @@
       </span>
     </template>
     <el-scrollbar height="280px" class="table-column-setting">
-      <el-checkbox-group
-        v-model="checkedList"
-        ref="columnListRef"
-        @change="handleChange"
-      >
-        <template v-for="item in plainOptions" :key="item.value">
-          <div
-            class="table-column-setting__check-item"
-            v-if="!('ifShow' in item && !item.ifShow)"
+      <template v-for="item in plainOptions" :key="item.value">
+        <div
+          class="table-column-setting__check-item"
+          v-if="!('ifShow' in item && !item.ifShow)"
+        >
+          <el-checkbox
+            :label="item.label"
+            v-model="item.visible"
+            :checked="item.visible"
+            @change="handleChangeShowColumn($event, item)"
+          ></el-checkbox>
+          <span
+            class="table-column-setting__fixed-left"
+            :class="[{ active: item.fixed === 'left' }]"
+            @click.stop="handleColumnFixed(item, 'left')"
           >
-            <el-checkbox :label="item.value">{{ item.label }}</el-checkbox>
-            <span
-              class="table-column-setting__fixed-left"
-              :class="[{ active: item.fixed === 'left' }]"
-              @click="handleColumnFixed(item, 'left')"
+            <el-tooltip
+              effect="dark"
+              content="固定到左侧"
+              placement="bottom-end"
             >
-              <el-tooltip
-                effect="dark"
-                content="固定到左侧"
-                placement="bottom-end"
-              >
-                <IconSvg name="icon-arrow-align-left"></IconSvg>
-              </el-tooltip>
-            </span>
-            <el-divider direction="vertical" />
-            <span
-              class="table-column-setting__fixed-right"
-              :class="[{ active: item.fixed === 'right' }]"
-              @click="handleColumnFixed(item, 'right')"
+              <IconSvg name="icon-arrow-align-left"></IconSvg>
+            </el-tooltip>
+          </span>
+          <el-divider direction="vertical" />
+          <span
+            class="table-column-setting__fixed-right"
+            :class="[{ active: item.fixed === 'right' }]"
+            @click.stop="handleColumnFixed(item, 'right')"
+          >
+            <el-tooltip
+              effect="dark"
+              content="固定到右侧"
+              placement="bottom-end"
             >
-              <el-tooltip
-                effect="dark"
-                content="固定到右侧"
-                placement="bottom-end"
-              >
-                <IconSvg name="icon-arrow-align-left"></IconSvg
-              ></el-tooltip>
-            </span>
-          </div>
-        </template>
-      </el-checkbox-group>
+              <IconSvg name="icon-arrow-align-left"></IconSvg
+            ></el-tooltip>
+          </span>
+        </div>
+      </template>
     </el-scrollbar>
   </el-popover>
 </template>
@@ -72,16 +71,9 @@ export default defineComponent({
 
     const state = reactive({
       isInit: true, //加载
-      checkedList: [], //已选中
+      checkedList: [], //已选中。有用到全选等操作，这次可用到
     });
-    //某列的选中和取消选中
-    function handleChange(checkedList = []) {
-      const sortList = unref(plainSortOptions).map((item) => item.value);
-      checkedList.sort((prev, next) => {
-        return sortList.indexOf(prev) - sortList.indexOf(next);
-      });
-      setColumns(checkedList);
-    }
+
 
     //重新获取表格列表配置
     function getColumns() {
@@ -97,6 +89,7 @@ export default defineComponent({
           ret.push({
             label,
             value: prop || label,
+            visible: item.visible || true,
             fixed: item.fixed || false,
           });
         });
@@ -140,29 +133,30 @@ export default defineComponent({
       }, 0);
     });
 
-    //设置列显示隐藏
-    function setColumns(columns = []) {
-      table.setColumns(columns);
-    }
     //设置固定位置
     function handleColumnFixed(column, fixed) {
-      if (!state.checkedList.includes(column.value)) return;
+      // if (!state.checkedList.includes(column.value)) return;
       table.setColumnFixed(column, fixed);
-      const columns = getColumns();
       const isFixed = column.fixed === fixed ? false : fixed;
-      const index = columns.findIndex((col) => col.prop === column.value);
+      const index = unref(plainOptions).findIndex(
+        (col) => col.value === column.value
+      );
       if (index !== -1) {
-        columns[index].fixed = isFixed;
+        unref(plainOptions)[index].fixed = isFixed;
       }
-      plainOptions.value = columns;
+    }
+
+    function handleChangeShowColumn(event, column) {
+      table.setColumnVisible(column, event);
     }
 
     return {
       ...toRefs(state),
       plainOptions,
       columnListRef,
-      handleChange,
+      // handleChange,
       handleColumnFixed,
+      handleChangeShowColumn,
     };
   },
 });

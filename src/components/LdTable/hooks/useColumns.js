@@ -1,4 +1,4 @@
-import { cloneDeep, isArray, isBoolean, isFunction, isString } from "lodash-es";
+import { cloneDeep, isBoolean, isFunction } from "lodash-es";
 import { ref, unref, computed, watch, toRaw } from "vue";
 
 /**
@@ -85,10 +85,10 @@ function handleSelectionColumn(propsRef, columns) {
 
 export function useColumns(propsRef, getPaginationRef) {
   const columnsRef = ref(unref(propsRef).columns);
-  let cacheColumns = unref(propsRef).columns;
+  // let cacheColumns = unref(propsRef).columns;
 
   //右侧操作列prop名
-  // const { rightOperatorActionName = "operatorAction" } = unref(propsRef);
+  const { rightOperatorActionName = "operatorAction" } = unref(propsRef);
 
   const getColumnsRef = computed(() => {
     const columns = cloneDeep(unref(columnsRef));
@@ -104,7 +104,7 @@ export function useColumns(propsRef, getPaginationRef) {
     () => unref(propsRef).columns,
     (columns) => {
       columnsRef.value = columns;
-      cacheColumns = columns.filter((item) => !item.type) ?? [];
+      // cacheColumns = columns.filter((item) => !item.type) ?? [];
     }
   );
 
@@ -132,28 +132,28 @@ export function useColumns(propsRef, getPaginationRef) {
     });
   });
 
-  function setColumns(columnList = []) {
-    const columns = cloneDeep(columnList);
-    if (!isArray(columns)) return;
-    if (columns.length <= 0) {
-      columnsRef.value = [];
-      return;
-    }
-    const firstColumn = columns[0];
-    if (!isString(firstColumn) && !isArray(firstColumn)) {
-      columnsRef.value = columns;
-    } else {
-      const columnKeys = columns.map((m) => m.toString());
-      const newColumns = [];
-      cacheColumns.forEach((item) => {
-        newColumns.push({
-          ...item,
-          visible: columnKeys.includes(item.prop.toString()),
-        });
-      });
-      columnsRef.value = newColumns;
-    }
-  }
+  // function setColumns(columnList = []) {
+  //   const columns = cloneDeep(columnList);
+  //   if (!isArray(columns)) return;
+  //   if (columns.length <= 0) {
+  //     columnsRef.value = [];
+  //     return;
+  //   }
+  //   const firstColumn = columns[0];
+  //   if (!isString(firstColumn) && !isArray(firstColumn)) {
+  //     columnsRef.value = columns;
+  //   } else {
+  //     const columnKeys = columns.map((m) => m.toString());
+  //     const newColumns = [];
+  //     cacheColumns.forEach((item) => {
+  //       newColumns.push({
+  //         ...item,
+  //         visible: columnKeys.includes(item.prop.toString()),
+  //       });
+  //     });
+  //     columnsRef.value = newColumns;
+  //   }
+  // }
 
   //列配置columns
   function getColumns(opt) {
@@ -172,9 +172,9 @@ export function useColumns(propsRef, getPaginationRef) {
       columns = columns.filter((item) => item.type !== "selection");
     }
     //过滤掉操作列
-    // if (ignoreOperatorAction) {
-    //   columns = columns.filter((item) => item.prop !== rightOperatorActionName);
-    // }
+    if (ignoreOperatorAction) {
+      columns = columns.filter((item) => item.prop !== rightOperatorActionName);
+    }
     return columns;
   }
 
@@ -192,11 +192,21 @@ export function useColumns(propsRef, getPaginationRef) {
     }
   }
 
+  //设置列表的显示隐藏
+  function setColumnVisible(column, visible) {
+    const index = unref(columnsRef).findIndex(
+      (col) => col.prop === column.value
+    );
+    if (index !== -1) {
+      unref(columnsRef)[index].visible = visible;
+    }
+  }
+
   return {
     getColumnsRef,
     getColumns,
-    setColumns,
     getViewColumns,
     setColumnFixed,
+    setColumnVisible,
   };
 }
